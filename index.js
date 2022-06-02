@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 var app = express();
 var mysql = require('mysql');
+const cors = require('cors');
 // const swaggerJSDoc = require('swagger-jsdoc');
 // const swaggerUi = require('swagger-ui-express');
 
@@ -29,6 +30,7 @@ console.log('Get connection ...');
 
 // parse application/json
 app.use(bodyParser.json());
+app.use(cors());
 
 //create database connection
 var conn = mysql.createConnection({
@@ -280,8 +282,8 @@ app.get('/api/reportR/:tower/:unit_no',(req, res) => {
   });
 
 //add new unit
-app.post('/api/:tower/customer',(req, res) => {
-let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, name: req.body.name, mob_no: req.body.mob_no, email: req.body.email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.params.tower};
+app.post('/api/customer',(req, res) => {
+let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, name: req.body.name, mob_no: req.body.mob_no, email: req.body.email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower};
 let sql = "INSERT INTO customer SET ?";
 let query = conn.query(sql, data,(err, results) => {
   if(err){
