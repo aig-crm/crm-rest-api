@@ -36,8 +36,8 @@ app.use(cors());
 var conn = mysql.createConnection({
     database: 'aig_crm',
     host: "localhost",
-    user: "root",
-    password: "rohan@1007",
+    user: "AIGROYAL",
+    password: "aig1357!AIG",
     connectTimeout: 60000
   });
 
