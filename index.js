@@ -28,6 +28,7 @@ const cors = require('cors');
 
 console.log('Get connection ...');
 
+
 // parse application/json
 app.use(bodyParser.json());
 app.use(cors());
