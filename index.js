@@ -50,7 +50,7 @@ conn.connect(function(err) {
 
 //show main
 app.get('/api/main',(req, res) => {
-  let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, name, mob_no, email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, name, mob_no, email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no";
+  let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -128,7 +128,7 @@ app.get('/api/reportR',(req, res) => {
 
 //show main for tower
 app.get('/api/main/:tower',(req, res) => {
-let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, name, mob_no, email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, name, mob_no, email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower;
+let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower;
 let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -206,7 +206,7 @@ app.get('/api/reportR/:tower',(req, res) => {
 
 //show main for single unit
 app.get('/api/main/:tower/:unit_no',(req, res) => {
-let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, name, mob_no, email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, name, mob_no, email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower+" and cb.unit_no="+req.params.unit_no;
+let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower+" and cb.unit_no="+req.params.unit_no;
 let query = conn.query(sql, (err, results) => {
   if(err){
     throw err
@@ -284,7 +284,7 @@ app.get('/api/reportR/:tower/:unit_no',(req, res) => {
 
 //add new unit
 app.post('/api/customer',(req, res) => {
-let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, name: req.body.name, mob_no: req.body.mob_no, email: req.body.email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower};
+let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, applicant_name: req.body.applicant_name, applicant_mob_no: req.body.applicant_mob_no, applicant_email: req.body.applicant_email, coapplicant_name: req.body.coapplicant_name, coapplicant_mob_no: req.body.coapplicant_mob_no, coapplicant_email: req.body.coapplicant_email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower};
 let sql = "INSERT INTO customer SET ?";
 let query = conn.query(sql, data,(err, results) => {
   if(err){
@@ -298,7 +298,7 @@ let query = conn.query(sql, data,(err, results) => {
 
 //add new payment
 app.post('/api/:unit_no/customer_account',(req, res) => {
-  let data = {id: req.body.id, unit_no: req.params.unit_no, payment_mode: req.body.payment_mode, date: req.body.date, bank_name: req.body.bank_name, rwgst: req.body.rwgst, rgst: req.body.rgst, status: req.body.status};
+  let data = {id: req.body.id, unit_no: req.params.unit_no, payment_mode: req.body.payment_mode, date: req.body.date, bank_name: req.body.bank_name, rwgst: req.body.rwgst, rgst: req.body.rgst, status: 0};
   let sql = "INSERT INTO customer_account SET ?";
   let query = conn.query(sql, data,(err, results) => {
     if(err){
@@ -310,7 +310,7 @@ app.post('/api/:unit_no/customer_account',(req, res) => {
   });
   });
 
-//update payment
+//update payment (for status only)
 app.put('/api/customer_account/:id',(req, res) => {
   let sql = "UPDATE customer_account SET status='"+req.body.status+"' WHERE id="+req.params.id;
   let query = conn.query(sql, (err, results) => {
