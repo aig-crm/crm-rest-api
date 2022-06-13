@@ -102,7 +102,7 @@ app.get('/api/reminder',(req, res) => {
 
 //show reportDR
 app.get('/api/reportDR',(req, res) => {
-  let sql = "select if(due_date<now(), count(unit_no), 0) as total_reminders, if(due_date>=now(), count(unit_no), 0) as total_demand, count(unit_no) as total from customer_payment_plan where due_date is not null and recieved<net_due";
+  let sql = "select 'reminder' as params, if(due_date<now(), count(unit_no), 0) as count from customer_payment_plan where due_date is not null and recieved<net_due union select 'demand', if(due_date>=now(), count(unit_no), 0) from customer_payment_plan where due_date is not null and recieved<net_due";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -116,6 +116,32 @@ app.get('/api/reportDR',(req, res) => {
 //show reportR
 app.get('/api/reportR',(req, res) => {
   let sql = "select if(status=0, count(unit_no), 0) as pending, if(status=1, count(unit_no), 0) as approved, count(unit_no) as total from customer_account";
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
+//show units-count
+app.get('/api/unitscount',(req, res) => {
+  let sql = "select 'booked' as params, count(unit_no) as count from tower_units where unit_no in (select unit_no from customer) union select 'empty', count(unit_no) from tower_units where unit_no not in (select unit_no from customer)";
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
+//show unittype-count
+app.get('/api/unittypecount',(req, res) => {
+  let sql = "select count(tu.unit_no) as total_units, count(c.unit_no) as booked_units, (count(tu.unit_no)-count(c.unit_no)) as empty_units, tu.unit_type from tower_units tu left join (select unit_no from customer)c on tu.unit_no=c.unit_no group by tu.unit_type";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -180,7 +206,7 @@ app.get('/api/reminder/:tower',(req, res) => {
 
 //show reportDR for tower
 app.get('/api/reportDR/:tower',(req, res) => {
-  let sql = "select if(due_date<now(), count(unit_no), 0) as total_reminders, if(due_date>=now(), count(unit_no), 0) as total_demand, count(unit_no) as total from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
+  let sql = "select 'reminder' as params, if(due_date<now(), count(unit_no), 0) as count from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" union select 'demand', if(due_date>=now(), count(unit_no), 0) from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -194,6 +220,32 @@ app.get('/api/reportDR/:tower',(req, res) => {
 //show reportR for tower
 app.get('/api/reportR/:tower',(req, res) => {
   let sql = "select if(status=0, count(unit_no), 0) as pending, if(status=1, count(unit_no), 0) as approved, count(unit_no) as total from customer_account where substring(unit_no,1,1)="+req.params.tower;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
+//show units-count for tower
+app.get('/api/unitscount/:tower',(req, res) => {
+  let sql = "select 'booked' as params, count(unit_no) as count from tower_units where unit_no in (select unit_no from customer) and tower="+req.params.tower+" union select 'empty', count(unit_no) from tower_units where unit_no not in (select unit_no from customer) and tower="+req.params.tower;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
+//show unittype-count for tower
+app.get('/api/unittypecount/:tower',(req, res) => {
+  let sql = "select count(tu.unit_no) as total_units, count(c.unit_no) as booked_units, (count(tu.unit_no)-count(c.unit_no)) as empty_units, tu.unit_type from tower_units tu left join (select unit_no from customer)c on tu.unit_no=c.unit_no where tu.tower="+req.params.tower+" group by tu.unit_type";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -258,7 +310,7 @@ app.get('/api/reminder/:tower/:unit_no',(req, res) => {
 
 //show reportDR for single unit
 app.get('/api/reportDR/:tower/:unit_no',(req, res) => {
-  let sql = "select if(due_date<now(), count(unit_no), 0) as total_reminders, if(due_date>=now(), count(unit_no), 0) as total_demand, count(unit_no) as total from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "select 'reminder' as params, if(due_date<now(), count(unit_no), 0) as count from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no+" union select 'demand', if(due_date>=now(), count(unit_no), 0) from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
