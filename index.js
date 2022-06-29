@@ -334,6 +334,45 @@ app.get('/api/reportR/:tower/:unit_no',(req, res) => {
   });
   });
 
+//BOOKING API- unit_no available
+app.get('/api/bookingApi/unit_no',(req, res) => {
+  let sql = "select unit_no from tower_units where unit_no not in(select unit_no from customer)";
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
+//BOOKING API- area_sqft available
+app.get('/api/bookingApi/area_sqft',(req, res) => {
+  let sql = "select distinct area_sqft from tower_units where unit_no not in(select unit_no from customer)";
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
+//BOOKING API- payment_plan available
+app.get('/api/bookingApi/payment_plan',(req, res) => {
+  let sql = "select distinct plan from payment_plan";
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
 //add new unit
 app.post('/api/customer',(req, res) => {
 let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, applicant_name: req.body.applicant_name, applicant_mob_no: req.body.applicant_mob_no, applicant_email: req.body.applicant_email, coapplicant_name: req.body.coapplicant_name, coapplicant_mob_no: req.body.coapplicant_mob_no, coapplicant_email: req.body.coapplicant_email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower};
