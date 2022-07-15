@@ -50,7 +50,7 @@ conn.connect(function(err) {
 
 //show main
 app.get('/api/main',(req, res) => {
-  let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no";
+  let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no->>'$.unit_no' as unit_no, area_sqft->>'$.area_sqft' as area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan->>'$.plan' as plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -128,7 +128,7 @@ app.get('/api/reportR',(req, res) => {
 
 //show units-count
 app.get('/api/unitscount',(req, res) => {
-  let sql = "select 'booked' as params, count(unit_no) as count from tower_units where unit_no in (select unit_no from customer) union select 'empty', count(unit_no) from tower_units where unit_no not in (select unit_no from customer)";
+  let sql = "select 'booked' as params, count(unit_no) as count from tower_units where unit_no in (select unit_no->>'$.unit_no' from customer) union select 'empty', count(unit_no) from tower_units where unit_no not in (select unit_no->>'$.unit_no' from customer)";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -141,7 +141,7 @@ app.get('/api/unitscount',(req, res) => {
 
 //show unittype-count
 app.get('/api/unittypecount',(req, res) => {
-  let sql = "select count(tu.unit_no) as total_units, count(c.unit_no) as booked_units, (count(tu.unit_no)-count(c.unit_no)) as empty_units, tu.unit_type from tower_units tu left join (select unit_no from customer)c on tu.unit_no=c.unit_no group by tu.unit_type";
+  let sql = "select count(tu.unit_no) as total_units, count(c.unit_no) as booked_units, (count(tu.unit_no)-count(c.unit_no)) as empty_units, tu.unit_type from tower_units tu left join (select unit_no->>'$.unit_no' as unit_no from customer)c on tu.unit_no=c.unit_no group by tu.unit_type";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -154,7 +154,7 @@ app.get('/api/unittypecount',(req, res) => {
 
 //show main for tower
 app.get('/api/main/:tower',(req, res) => {
-let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower;
+let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no->>'$.unit_no' as unit_no, area_sqft->>'$.area_sqft' as area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan->>'$.plan' as plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower;
 let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -232,7 +232,7 @@ app.get('/api/reportR/:tower',(req, res) => {
 
 //show units-count for tower
 app.get('/api/unitscount/:tower',(req, res) => {
-  let sql = "select 'booked' as params, count(unit_no) as count from tower_units where unit_no in (select unit_no from customer) and tower="+req.params.tower+" union select 'empty', count(unit_no) from tower_units where unit_no not in (select unit_no from customer) and tower="+req.params.tower;
+  let sql = "select 'booked' as params, count(unit_no) as count from tower_units where unit_no in (select unit_no->>'$.unit_no' from customer) and tower="+req.params.tower+" union select 'empty', count(unit_no) from tower_units where unit_no not in (select unit_no->>'$.unit_no' from customer) and tower="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -245,7 +245,7 @@ app.get('/api/unitscount/:tower',(req, res) => {
 
 //show unittype-count for tower
 app.get('/api/unittypecount/:tower',(req, res) => {
-  let sql = "select count(tu.unit_no) as total_units, count(c.unit_no) as booked_units, (count(tu.unit_no)-count(c.unit_no)) as empty_units, tu.unit_type from tower_units tu left join (select unit_no from customer)c on tu.unit_no=c.unit_no where tu.tower="+req.params.tower+" group by tu.unit_type";
+  let sql = "select count(tu.unit_no) as total_units, count(c.unit_no) as booked_units, (count(tu.unit_no)-count(c.unit_no)) as empty_units, tu.unit_type from tower_units tu left join (select unit_no->>'$.unit_no' as unit_no from customer)c on tu.unit_no=c.unit_no where tu.tower="+req.params.tower+" group by tu.unit_type";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -258,7 +258,7 @@ app.get('/api/unittypecount/:tower',(req, res) => {
 
 //show main for single unit
 app.get('/api/main/:tower/:unit_no',(req, res) => {
-let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower+" and cb.unit_no="+req.params.unit_no;
+let sql = "select s_no, tower, booking_date, cb.unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan, loan, rate, nbp, gst, tbc, tdtd, rwgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rgst, rwgst*0.05) as rgst, if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05) as rwogst, rwgst*100/tbc as rec_per, tbc-rwgst as balance, tdtd-rwgst as o_t from(select s_no, booking_date, tower, unit_no->>'$.unit_no' as unit_no, area_sqft->>'$.area_sqft' as area_sqft, applicant_name, applicant_mob_no, applicant_email, coapplicant_name, coapplicant_mob_no, coapplicant_email, broker, plan->>'$.plan' as plan, loan, if(nbp=0, tbc/area_sqft, nbp/area_sqft) as rate, if(nbp=0, tbc-tbc*5/105, nbp) as nbp, if(nbp=0, tbc*5/105, nbp*0.05) as gst, if(tbc=0, nbp+nbp*0.05, tbc) as tbc, if(tbc=0, (nbp+nbp*0.05)*0.4, tbc*0.4) as tdtd from customer)cb left join (select unit_no, sum(rwgst) as rwgst, sum(rgst) as rgst from customer_account group by unit_no)cba on cb.unit_no=cba.unit_no where tower="+req.params.tower+" and cb.unit_no="+req.params.unit_no;
 let query = conn.query(sql, (err, results) => {
   if(err){
     throw err
@@ -336,7 +336,7 @@ app.get('/api/reportR/:tower/:unit_no',(req, res) => {
 
 //BOOKING API- unit_no available
 app.get('/api/bookingApi/unit_no',(req, res) => {
-  let sql = "select unit_no from tower_units where unit_no not in(select unit_no from customer)";
+  let sql = "select unit_no from tower_units where unit_no not in(select unit_no->>'$.unit_no' from customer)";
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -349,7 +349,7 @@ app.get('/api/bookingApi/unit_no',(req, res) => {
 
 //BOOKING API- area_sqft available
 app.get('/api/bookingApi/area_sqft',(req, res) => {
-  let sql = "select distinct area_sqft from tower_units where unit_no not in(select unit_no from customer)";
+  let sql = "select distinct area_sqft from tower_units where unit_no not in(select unit_no->>'$.unit_no' from customer)";
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
