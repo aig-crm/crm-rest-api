@@ -401,6 +401,38 @@ app.post('/api/:unit_no/customer_account',(req, res) => {
   });
   });
 
+//login admin
+app.post('/api/admin',(req, res) => {
+  let data = {username: req.body.username, password: req.body.password, flag: req.body.flag};
+  let sql = "SELECT * FROM users where username=? and password=? and flag=1";
+  let query = conn.query(sql, data,(err, results) => {
+    if(err){
+      throw err
+    }
+    if(results) {
+      res.send(JSON.stringify(results));
+    }else{
+      res.send({message: "Wrong credentials!"})
+    };
+  });
+  });
+
+//login crm
+app.post('/api/crm',(req, res) => {
+  let data = {username: req.body.username, password: req.body.password, flag: req.body.flag};
+  let sql = "SELECT * FROM users where username=? and password=? and flag=0";
+  let query = conn.query(sql, data,(err, results) => {
+    if(err){
+      throw err
+    }
+    if(results) {
+      res.send(JSON.stringify(results));
+    }else{
+      res.send({message: "Wrong credentials!"})
+    };
+  });
+  });
+
 //update payment (for status only)
 app.put('/api/customer_account/:id',(req, res) => {
   let sql = "UPDATE customer_account SET status='"+req.body.status+"' WHERE id="+req.params.id;
