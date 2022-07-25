@@ -335,8 +335,8 @@ app.get('/api/reportR/:tower/:unit_no',(req, res) => {
   });
 
 //BOOKING API- unit_no available
-app.get('/api/bookingApi/unit_no',(req, res) => {
-  let sql = "select unit_no from tower_units where unit_no not in(select unit_no->>'$.unit_no' from customer)";
+app.get('/api/bookingApi/unit_no/:tower',(req, res) => {
+  let sql = "select unit_no from tower_units where unit_no not in(select unit_no->>'$.unit_no' from customer) and tower="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -348,8 +348,8 @@ app.get('/api/bookingApi/unit_no',(req, res) => {
   });
 
 //BOOKING API- area_sqft available
-app.get('/api/bookingApi/area_sqft',(req, res) => {
-  let sql = "select distinct area_sqft from tower_units where unit_no not in(select unit_no->>'$.unit_no' from customer)";
+app.get('/api/bookingApi/area_sqft/:tower',(req, res) => {
+  let sql = "select distinct area_sqft from tower_units where unit_no not in(select unit_no->>'$.unit_no' from customer) and tower="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
