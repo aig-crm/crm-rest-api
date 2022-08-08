@@ -76,7 +76,7 @@ app.get('/api/receipt',(req, res) => {
 
 //show demand
 app.get('/api/demand',(req, res) => {
-  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=now() and due_date is not null and recieved<net_due";
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=current_date() and due_date is not null and recieved<net_due";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -89,7 +89,7 @@ app.get('/api/demand',(req, res) => {
 
 //show reminder
 app.get('/api/reminder',(req, res) => {
-  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date<now() and due_date is not null and recieved<net_due";
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date<current_date() and due_date is not null and recieved<net_due";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -102,7 +102,7 @@ app.get('/api/reminder',(req, res) => {
 
 //show reportDR
 app.get('/api/reportDR',(req, res) => {
-  let sql = "select 'reminder' as params, if(due_date<now(), count(unit_no), 0) as count from customer_payment_plan where due_date is not null and recieved<net_due union select 'demand', if(due_date>=now(), count(unit_no), 0) from customer_payment_plan where due_date is not null and recieved<net_due";
+  let sql = "select 'reminder' as params, count(id) as count from customer_payment_plan where due_date is not null and recieved<net_due and due_date<current_date() union select 'demand', count(id) as count from customer_payment_plan where due_date is not null and recieved<net_due and due_date>=current_date()";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -180,7 +180,7 @@ app.get('/api/receipt/:tower',(req, res) => {
 
 //show demand for tower
 app.get('/api/demand/:tower',(req, res) => {
-  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=now() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=current_date() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -193,7 +193,7 @@ app.get('/api/demand/:tower',(req, res) => {
 
 //show reminder for tower
 app.get('/api/reminder/:tower',(req, res) => {
-  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date<now() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date<current_date() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -206,7 +206,7 @@ app.get('/api/reminder/:tower',(req, res) => {
 
 //show reportDR for tower
 app.get('/api/reportDR/:tower',(req, res) => {
-  let sql = "select 'reminder' as params, if(due_date<now(), count(unit_no), 0) as count from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" union select 'demand', if(due_date>=now(), count(unit_no), 0) from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower;
+  let sql = "select 'reminder' as params, count(id) as count from customer_payment_plan where due_date is not null and recieved<net_due and due_date<current_date() and substring(unit_no,1,1)="+req.params.tower+" union select 'demand', count(id) as count from customer_payment_plan where due_date is not null and recieved<net_due and due_date>=current_date() and substring(unit_no,1,1)="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -297,7 +297,7 @@ app.get('/api/receipt_approved/:tower/:unit_no',(req, res) => {
 
 //show demand for single unit
 app.get('/api/demand/:tower/:unit_no',(req, res) => {
-  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=now() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=current_date() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -310,7 +310,20 @@ app.get('/api/demand/:tower/:unit_no',(req, res) => {
 
 //show reminder for single unit
 app.get('/api/reminder/:tower/:unit_no',(req, res) => {
-  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date<now() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date<current_date() and due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
+//show customer_payment_plan for single unit
+app.get('/api/cpp/:tower/:unit_no',(req, res) => {
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where recieved<net_due and due_date is null and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -323,7 +336,7 @@ app.get('/api/reminder/:tower/:unit_no',(req, res) => {
 
 //show reportDR for single unit
 app.get('/api/reportDR/:tower/:unit_no',(req, res) => {
-  let sql = "select 'reminder' as params, if(due_date<now(), count(unit_no), 0) as count from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no+" union select 'demand', if(due_date>=now(), count(unit_no), 0) from customer_payment_plan where due_date is not null and recieved<net_due and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "select 'reminder' as params, count(id) as count from customer_payment_plan where due_date is not null and recieved<net_due and due_date<current_date() and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no+" union select 'demand', count(id) as count from customer_payment_plan where due_date is not null and recieved<net_due and due_date>=current_date() and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
