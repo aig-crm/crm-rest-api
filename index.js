@@ -269,9 +269,9 @@ let query = conn.query(sql, (err, results) => {
 });
 });
 
-//show receipt for single unit
+//show receipt for single unit receipt_pending
 app.get('/api/receipt_pending/:tower/:unit_no',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, rgst, receipt_no, status FROM customer_account where status=0 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, rgst, receipt_no, if(status=0, 'Pending', '') as status FROM customer_account where status=0 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -282,9 +282,9 @@ app.get('/api/receipt_pending/:tower/:unit_no',(req, res) => {
   });
   });
 
-//show receipt for single unit
+//show receipt for single unit receipt_approved
 app.get('/api/receipt_approved/:tower/:unit_no',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, rgst, receipt_no, status FROM customer_account where status=1 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, rgst, receipt_no, if(status=1, 'Approved', '') as status FROM customer_account where status=1 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
