@@ -347,6 +347,19 @@ app.get('/api/reminder/:tower/:unit_no',(req, res) => {
   });
   });
 
+//show demand-reminder for specific id
+app.get('/api/demandR/:id',(req, res) => {
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date>=current_date() and due_date is not null and recieved<net_due and id="+req.params.id;
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
 //show customer_payment_plan for single unit
 app.get('/api/cpp/:tower/:unit_no',(req, res) => {
   let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, particulars, percentage, net_bsp, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where recieved<net_due and due_date is null and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
