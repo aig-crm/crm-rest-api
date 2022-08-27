@@ -576,6 +576,121 @@ let query = conn.query(sql, (err, results) => {
   });
 });
 
+app.get('/api/arr/:unit_no',(req, res) => {
+  a1=[];
+  a2=[];
+  arr3 = [[]];
+  element2 = [];
+  let sql = "select id, net_due from customer_payment_plan where unit_no="+req.params.unit_no;
+  conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      let newArray = results.map((row) => {
+        return row.net_due;
+      })
+      a1 = newArray;
+      let sql = "select id, rwgst from customer_account where unit_no="+req.params.unit_no+" order by id desc";
+      conn.query(sql, (err, results) => {
+        if(err){
+          throw err
+        }
+        else {
+          let newArray = results.map((row) => {
+            return row.rwgst;
+          })
+          a2 = newArray;
+          i1 = 0;
+          i2 = 0;
+          while (i1 < a1.length && i2 < a2.length) {
+            if (a1[i1] < a2[i2]) {
+              arr3[i2].push('{' + '"pending_amt": ' + a2[i1] + ',' + '"required_amt": ' + a1[i1] + ',' + '"received_amt": ' + a2[i2] +'}');
+              a2[i2]=a2[i2]-a1[i1];
+            }
+            else{
+              arr3[i2].push('{' + '"pending_amt": ' + a1[i1] + ',' + '"required_amt": ' + a2[i2] + ',' + '"received_amt": ' + a2[i2] +'}');
+              a1[i1]=a1[i1]-a2[i2];
+              a2[i2]=0;
+              i1--;
+            }
+            i1++;
+            if (a2[i2]==0) {
+              i2++;
+              arr3.push([]);
+            }
+          }
+          for (let i = 0; i < arr3.length; i++) {
+            const element = arr3[i];
+            for (let j = 0; j < element.length; j++) {
+              element2 = element[j];
+            }
+          }
+          res.send(arr3);
+        };
+      });
+    };
+  });
+  });
+
+function arr1(arr1) {
+  let sql = "select id, net_due from customer_payment_plan where unit_no='C-1603'";
+  conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      let newArray = results.map((row) => {
+        return row.net_due;
+      })
+      arr1(newArray);
+    };
+  });
+}
+function arr2(arr2) {
+  let sql = "select id, rwgst from customer_account where unit_no='C-1603' order by id desc";
+  conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      let newArray = results.map((row) => {
+        return row.rwgst;
+      })
+      arr2(newArray);
+    };
+  });
+}
+function arrMerging(a1, a2, arr3) {
+  arr1(myArray => {
+    a1 = myArray;
+    arr2(myArray => {
+      a2 = myArray;
+      i1 = 0;
+	    i2 = 0;
+      arr3 = [[]];
+      while (i1 < a1.length && i2 < a2.length) {
+        if (a1[i1] < a2[i2]) {
+          arr3[i2].push('{' + a1[i1] + ',' + a2[i1] + ',' + a2[i2] +'}');
+          a2[i2]=a2[i2]-a1[i1];
+        }
+        else{
+          arr3[i2].push('{' + a2[i2] + ',' + a1[i1] + ',' + a2[i2] +'}');
+          a1[i1]=a1[i1]-a2[i2];
+          a2[i2]=0;
+          i1--;
+        }
+        i1++;
+        if (a2[i2]==0) {
+          i2++;
+          arr3.push([]);
+        }
+      }
+      console.log(arr3);
+    });
+  });
+}
+
 // //Delete product
 // app.delete('/api/products/:id',(req, res) => {
 // let sql = "DELETE FROM product WHERE product_id="+req.params.id+"";
@@ -590,6 +705,13 @@ let query = conn.query(sql, (err, results) => {
 // Server listening
 app.listen(80,() =>{
 console.log('Server started on port 80...');
+arr1(myArray => {
+  console.log(myArray);
+});
+arr2(myArray2 => {
+  console.log(myArray2);
+});
+arrMerging();
 });
 
 
