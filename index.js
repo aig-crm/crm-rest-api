@@ -579,9 +579,12 @@ let query = conn.query(sql, (err, results) => {
 app.get('/api/arr/:unit_no',(req, res) => {
   a1=[];
   a2=[];
+  d1=[];
+  d2=[];
+  r1=[];
+  u1=[];
   arr3 = [[]];
-  element2 = [];
-  let sql = "select id, net_due from customer_payment_plan where unit_no="+req.params.unit_no;
+  let sql = "select id, net_due, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date from customer_payment_plan where unit_no="+req.params.unit_no;
   conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -590,8 +593,12 @@ app.get('/api/arr/:unit_no',(req, res) => {
       let newArray = results.map((row) => {
         return row.net_due;
       })
+      let newArrayDate = results.map((row) => {
+        return row.due_date;
+      })
       a1 = newArray;
-      let sql = "select id, rwgst from customer_account where unit_no="+req.params.unit_no+" order by id desc";
+      d1 = newArrayDate;
+      let sql = "select id, rwgst, date, receipt_no, unit_no from customer_account where unit_no="+req.params.unit_no+" order by id desc";
       conn.query(sql, (err, results) => {
         if(err){
           throw err
@@ -600,16 +607,28 @@ app.get('/api/arr/:unit_no',(req, res) => {
           let newArray = results.map((row) => {
             return row.rwgst;
           })
+          let newArrayDate = results.map((row) => {
+            return row.date;
+          })
+          let newArrayReceipt = results.map((row) => {
+            return row.receipt_no;
+          })
+          let newArrayUnit = results.map((row) => {
+            return row.unit_no;
+          })
           a2 = newArray;
+          d2 = newArrayDate;
+          r1 = newArrayReceipt;
+          u1 = newArrayUnit;
           i1 = 0;
           i2 = 0;
           while (i1 < a1.length && i2 < a2.length) {
             if (a1[i1] < a2[i2]) {
-              arr3[i2].push('{' + '"pending_amt": ' + a2[i1] + ',' + '"required_amt": ' + a1[i1] + ',' + '"received_amt": ' + a2[i2] +'}');
+              arr3[i2].push('{"id": ' + '"' + r1[i2] + '-' + a2[i2] + '"' + ',' + '"unit_no": ' + '"' + u1[i1] + '"' + ',' + '"due_date": ' + '"' + d1[i1] + '"' + ',' + '"received_date": ' + '"' + d2[i2] + '"' + ',' + '"pending_amt": ' + '"' + a2[i1] + '"' + ',' + '"required_amt": ' + '"' + a1[i1] + '"' + ',' + '"received_amt": ' + '"' + a2[i2] + '"' +'}');
               a2[i2]=a2[i2]-a1[i1];
             }
             else{
-              arr3[i2].push('{' + '"pending_amt": ' + a1[i1] + ',' + '"required_amt": ' + a2[i2] + ',' + '"received_amt": ' + a2[i2] +'}');
+              arr3[i2].push('{"id": ' + '"' + r1[i2] + '-' + a2[i2] + '"' + ',' + '"unit_no": ' + '"' + u1[i1] + '"' + ',' + '"due_date": ' + '"' + d1[i1] + '"' + ',' + '"received_date": ' + '"' + d2[i2] + '"' + ',' + '"pending_amt": ' + '"' + a1[i1] + '"' + ',' + '"required_amt": ' + '"' + a2[i2] + '"' + ',' + '"received_amt": ' + '"' + a2[i2] + '"' +'}');
               a1[i1]=a1[i1]-a2[i2];
               a2[i2]=0;
               i1--;
@@ -620,13 +639,31 @@ app.get('/api/arr/:unit_no',(req, res) => {
               arr3.push([]);
             }
           }
-          for (let i = 0; i < arr3.length; i++) {
-            const element = arr3[i];
-            for (let j = 0; j < element.length; j++) {
-              element2 = element[j];
+          const element = [];
+          arr3.forEach((item)=>{
+              if(item.length>1){
+                  item.forEach((ele)=>{
+                    element.push(JSON.parse(ele));
+                  })
+              }
+              else if(item.length==0){
+                element.push({})
+              }
+              else{
+                element.push(JSON.parse(item[0]));
+              }
+          })
+          console.log(element);
+          let sql = "INSERT INTO customer_interest SET ?";
+          let query = conn.query(sql, element,(err, results) => {
+            if(err){
+              throw err
             }
-          }
-          res.send(arr3);
+            else {
+              res.send(JSON.stringify(results))
+            };
+          });
+          //res.send(element);
         };
       });
     };
