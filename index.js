@@ -579,12 +579,13 @@ let query = conn.query(sql, (err, results) => {
 app.get('/api/arr/:unit_no',(req, res) => {
   a1=[];
   a2=[];
+  desc=[];
   d1=[];
   d2=[];
   r1=[];
   u1=[];
   arr3 = [[]];
-  let sql = "select id, net_due, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date from customer_payment_plan where unit_no="+req.params.unit_no;
+  let sql = "select id, net_due, ifnull(DATE_FORMAT(due_date, '%d-%m-%Y'), '') as due_date, description from customer_payment_plan where unit_no="+req.params.unit_no;
   conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -596,9 +597,13 @@ app.get('/api/arr/:unit_no',(req, res) => {
       let newArrayDate = results.map((row) => {
         return row.due_date;
       })
+      let newArrayDesc = results.map((row) => {
+        return row.description;
+      })
+      desc = newArrayDesc;
       a1 = newArray;
       d1 = newArrayDate;
-      let sql = "select id, rwgst, date, receipt_no, unit_no from customer_account where unit_no="+req.params.unit_no+" order by id desc";
+      let sql = "select id, rwgst, ifnull(date,'') as date, receipt_no, unit_no from customer_account where unit_no="+req.params.unit_no;
       conn.query(sql, (err, results) => {
         if(err){
           throw err
@@ -624,11 +629,11 @@ app.get('/api/arr/:unit_no',(req, res) => {
           i2 = 0;
           while (i1 < a1.length && i2 < a2.length) {
             if (a1[i1] < a2[i2]) {
-              arr3[i2].push('{"id": ' + '"' + r1[i2] + '-' + a2[i2] + '"' + ',' + '"unit_no": ' + '"' + u1[i1] + '"' + ',' + '"due_date": ' + '"' + d1[i1] + '"' + ',' + '"received_date": ' + '"' + d2[i2] + '"' + ',' + '"pending_amt": ' + '"' + a2[i1] + '"' + ',' + '"required_amt": ' + '"' + a1[i1] + '"' + ',' + '"received_amt": ' + '"' + a2[i2] + '"' +'}');
+              arr3[i2].push('{"id": ' + '"' + r1[i2] + '-' + a2[i2] + '"' + ',' + '"unit_no": ' + '"' + u1[i1] + '"' + ',' + '"description": ' + '"' + desc[i1] + '"' + ',' + '"due_amt": ' + '"' + a1[i1] + '"' + ',' + '"due_date": ' + '"' + d1[i1] + '"' + ',' + '"received_date": ' + '"' + d2[i2] + '"' + ',' + '"required_amt": ' + '"' + a1[i1] + '"' + ',' + '"received_amt": ' + '"' + a2[i2] + '"' +'}');
               a2[i2]=a2[i2]-a1[i1];
             }
             else{
-              arr3[i2].push('{"id": ' + '"' + r1[i2] + '-' + a2[i2] + '"' + ',' + '"unit_no": ' + '"' + u1[i1] + '"' + ',' + '"due_date": ' + '"' + d1[i1] + '"' + ',' + '"received_date": ' + '"' + d2[i2] + '"' + ',' + '"pending_amt": ' + '"' + a1[i1] + '"' + ',' + '"required_amt": ' + '"' + a2[i2] + '"' + ',' + '"received_amt": ' + '"' + a2[i2] + '"' +'}');
+              arr3[i2].push('{"id": ' + '"' + r1[i2] + '-' + a2[i2] + '"' + ',' + '"unit_no": ' + '"' + u1[i1] + '"' + ',' + '"description": ' + '"' + desc[i1] + '"' + ',' + '"due_amt": ' + '"' + a1[i1] + '"' + ',' + '"due_date": ' + '"' + d1[i1] + '"' + ',' + '"received_date": ' + '"' + d2[i2] + '"' + ',' + '"required_amt": ' + '"' + a2[i2] + '"' + ',' + '"received_amt": ' + '"' + a2[i2] + '"' +'}');
               a1[i1]=a1[i1]-a2[i2];
               a2[i2]=0;
               i1--;
@@ -654,16 +659,7 @@ app.get('/api/arr/:unit_no',(req, res) => {
               }
           })
           console.log(element);
-          let sql = "INSERT INTO customer_interest SET ?";
-          let query = conn.query(sql, element,(err, results) => {
-            if(err){
-              throw err
-            }
-            else {
-              res.send(JSON.stringify(results))
-            };
-          });
-          //res.send(element);
+          res.send(element);
         };
       });
     };
@@ -685,7 +681,7 @@ function arr1(arr1) {
   });
 }
 function arr2(arr2) {
-  let sql = "select id, rwgst from customer_account where unit_no='C-1603' order by id desc";
+  let sql = "select id, rwgst from customer_account where unit_no='C-1603'";
   conn.query(sql, (err, results) => {
     if(err){
       throw err
