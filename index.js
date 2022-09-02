@@ -585,7 +585,7 @@ app.get('/api/arr/:unit_no',(req, res) => {
   r1=[];
   u1=[];
   arr3 = [[]];
-  let sql = "select id, net_due, ifnull(DATE_FORMAT(due_date, '%d-%m-%Y'), '') as due_date, description from customer_payment_plan where unit_no="+req.params.unit_no;
+  let sql = "select id, net_due, ifnull(due_date, '') as due_date, concat(description, '-(', net_due, ')') as description from customer_payment_plan where unit_no="+req.params.unit_no;
   conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -603,7 +603,7 @@ app.get('/api/arr/:unit_no',(req, res) => {
       desc = newArrayDesc;
       a1 = newArray;
       d1 = newArrayDate;
-      let sql = "select id, rwgst, ifnull(date,'') as date, receipt_no, unit_no from customer_account where unit_no="+req.params.unit_no;
+      let sql = "select id, rwgst, ifnull(date,'') as date, receipt_no, unit_no from customer_account where unit_no="+req.params.unit_no+"order by date";
       conn.query(sql, (err, results) => {
         if(err){
           throw err
@@ -658,71 +658,12 @@ app.get('/api/arr/:unit_no',(req, res) => {
                 element.push(JSON.parse(item[0]));
               }
           })
-          console.log(element);
           res.send(element);
         };
       });
     };
   });
   });
-
-function arr1(arr1) {
-  let sql = "select id, net_due from customer_payment_plan where unit_no='C-1603'";
-  conn.query(sql, (err, results) => {
-    if(err){
-      throw err
-    }
-    else {
-      let newArray = results.map((row) => {
-        return row.net_due;
-      })
-      arr1(newArray);
-    };
-  });
-}
-function arr2(arr2) {
-  let sql = "select id, rwgst from customer_account where unit_no='C-1603'";
-  conn.query(sql, (err, results) => {
-    if(err){
-      throw err
-    }
-    else {
-      let newArray = results.map((row) => {
-        return row.rwgst;
-      })
-      arr2(newArray);
-    };
-  });
-}
-function arrMerging(a1, a2, arr3) {
-  arr1(myArray => {
-    a1 = myArray;
-    arr2(myArray => {
-      a2 = myArray;
-      i1 = 0;
-	    i2 = 0;
-      arr3 = [[]];
-      while (i1 < a1.length && i2 < a2.length) {
-        if (a1[i1] < a2[i2]) {
-          arr3[i2].push('{' + a1[i1] + ',' + a2[i1] + ',' + a2[i2] +'}');
-          a2[i2]=a2[i2]-a1[i1];
-        }
-        else{
-          arr3[i2].push('{' + a2[i2] + ',' + a1[i1] + ',' + a2[i2] +'}');
-          a1[i1]=a1[i1]-a2[i2];
-          a2[i2]=0;
-          i1--;
-        }
-        i1++;
-        if (a2[i2]==0) {
-          i2++;
-          arr3.push([]);
-        }
-      }
-      console.log(arr3);
-    });
-  });
-}
 
 // //Delete product
 // app.delete('/api/products/:id',(req, res) => {
@@ -738,13 +679,6 @@ function arrMerging(a1, a2, arr3) {
 // Server listening
 app.listen(80,() =>{
 console.log('Server started on port 80...');
-arr1(myArray => {
-  console.log(myArray);
-});
-arr2(myArray2 => {
-  console.log(myArray2);
-});
-arrMerging();
 });
 
 
