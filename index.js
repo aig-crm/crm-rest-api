@@ -63,7 +63,7 @@ app.get('/api/main',(req, res) => {
 
 //show receipt
 app.get('/api/receipt',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, status FROM customer_account";
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, status FROM customer_account";
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -193,7 +193,7 @@ let query = conn.query(sql, (err, results) => {
 
 //show receipt for tower
 app.get('/api/receipt/:tower',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, status FROM customer_account where substring(unit_no,1,1)="+req.params.tower;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, status FROM customer_account where substring(unit_no,1,1)="+req.params.tower;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
@@ -310,7 +310,7 @@ let query = conn.query(sql, (err, results) => {
 
 //show receipt for single unit receipt_pending
 app.get('/api/receipt_pending/:tower/:unit_no',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=0, 'Pending', '') as status FROM customer_account where status=0 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=0, 'Pending', '') as status FROM customer_account where status=0 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -323,7 +323,7 @@ app.get('/api/receipt_pending/:tower/:unit_no',(req, res) => {
 
 //show receipt for single unit receipt_approved
 app.get('/api/receipt_approved/:tower/:unit_no',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=1, 'Approved', '') as status FROM customer_account where status=1 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=1, 'Approved', '') as status FROM customer_account where status=1 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -585,7 +585,7 @@ app.get('/api/arr/:unit_no',(req, res) => {
   r1=[];
   u1=[];
   arr3 = [[]];
-  let sql = "select id, net_due, ifnull(due_date, '') as due_date, concat(description, '-(', net_due, ')') as description from customer_payment_plan where unit_no="+req.params.unit_no;
+  let sql = "select id, net_due, ifnull(due_date, '') as due_date, description from customer_payment_plan where unit_no="+req.params.unit_no;
   conn.query(sql, (err, results) => {
     if(err){
       throw err
