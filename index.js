@@ -563,6 +563,19 @@ app.put('/api/customer_account/:id',(req, res) => {
     });
   });
 
+//update payment 
+app.put('/api/receipt_edit/:receipt_no',(req, res) => {
+  let sql = "UPDATE customer_account SET payment_mode='"+req.body.payment_mode+"', bank_name='"+req.body.bank_name+"', rwgst="+req.body.rwgst+", rgst="+req.body.rgst+" WHERE receipt_no="+req.params.receipt_no;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+    });
+  });
+
 //update customer payment due date
 app.put('/api/payments/:id',(req, res) => {
 let sql = "UPDATE customer_payment_plan SET due_date='"+req.body.due_date+"' WHERE id="+req.params.id;
