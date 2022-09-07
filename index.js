@@ -576,6 +576,19 @@ app.put('/api/receipt_edit/:receipt_no',(req, res) => {
     });
   });
 
+//delete payment 
+app.delete('/api/receipt_delete/:receipt_no',(req, res) => {
+  let sql = "delete from customer_account WHERE receipt_no="+req.params.receipt_no;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+    });
+  });
+
 //update customer payment due date
 app.put('/api/payments/:id',(req, res) => {
 let sql = "UPDATE customer_payment_plan SET due_date='"+req.body.due_date+"' WHERE id="+req.params.id;
