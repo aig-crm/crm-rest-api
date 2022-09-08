@@ -490,6 +490,32 @@ app.get('/api/bookingApi/broker',(req, res) => {
   });
   });
 
+//show canceled bookings
+app.get('/api/cbookings',(req, res) => {
+  let sql = "select s_no, booking_date, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, broker, plan, loan, nbp, tbc, tower, coapplicant_name, coapplicant_mob_no, coapplicant_email, amt, remarks from cancel_bookings order by s_no";
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
+//show canceled bookings for tower
+app.get('/api/cbookings/:tower',(req, res) => {
+  let sql = "select s_no, booking_date, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, broker, plan, loan, nbp, tbc, tower, coapplicant_name, coapplicant_mob_no, coapplicant_email, amt, remarks from cancel_bookings where tower="+req.params.tower+"order by s_no";
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
 //add new unit
 app.post('/api/customer',(req, res) => {
 let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, applicant_name: req.body.applicant_name, applicant_mob_no: req.body.applicant_mob_no, applicant_email: req.body.applicant_email, coapplicant_name: req.body.coapplicant_name, coapplicant_mob_no: req.body.coapplicant_mob_no, coapplicant_email: req.body.coapplicant_email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower, aadhar_card: req.body.aadhar_card, address: req.body.address, gst_choice: req.body.gst_choice, pan_card: req.body.pan_card};
@@ -503,6 +529,20 @@ let query = conn.query(sql, data,(err, results) => {
   };
 });
 });
+
+//add cancel unit
+app.post('/api/cancel_booking/:unit_no',(req, res) => {
+  let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, applicant_name: req.body.applicant_name, applicant_mob_no: req.body.applicant_mob_no, applicant_email: req.body.applicant_email, coapplicant_name: req.body.coapplicant_name, coapplicant_mob_no: req.body.coapplicant_mob_no, coapplicant_email: req.body.coapplicant_email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, tower: req.body.tower, amt: req.body.amt, remarks: req.body.remarks};
+  let sql = "INSERT INTO cancel_bookings SET ?";
+  let query = conn.query(sql, data,(err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
 
 //add new payment
 app.post('/api/:unit_no/customer_account',(req, res) => {
@@ -579,6 +619,32 @@ app.put('/api/receipt_edit/:receipt_no',(req, res) => {
 //delete payment 
 app.delete('/api/receipt_delete/:receipt_no',(req, res) => {
   let sql = "delete from customer_account WHERE receipt_no="+req.params.receipt_no;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+    });
+  });
+
+//delete booking 
+app.delete('/api/booking_delete/:unit_no',(req, res) => {
+  let sql = "delete from customer WHERE unit_no->>'$.unit_no'="+req.params.unit_no;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+    });
+  });
+
+//delete customer payment plan 
+app.delete('/api/cpp_delete/:unit_no',(req, res) => {
+  let sql = "delete from customer_payment_plan WHERE unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
