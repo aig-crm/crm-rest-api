@@ -546,7 +546,7 @@ app.post('/api/cancel_booking/:unit_no',(req, res) => {
 
 //add new payment
 app.post('/api/:unit_no/customer_account',(req, res) => {
-  let data = {id: req.body.id, unit_no: req.params.unit_no, payment_mode: req.body.payment_mode, date: req.body.date, bank_name: req.body.bank_name, rwgst: req.body.rwgst, rgst: req.body.rgst, receipt_no: req.body.receipt_no, status: 0};
+  let data = {id: req.body.id, unit_no: req.params.unit_no, payment_mode: req.body.payment_mode, date: req.body.date, bank_name: req.body.bank_name, rwgst: req.body.rwgst, rgst: req.body.rgst, receipt_no: req.body.receipt_no, status: 0, bank_branch: req.body.bank_branch, ref_no: req.body.ref_no};
   let sql = "INSERT INTO customer_account SET ?";
   let query = conn.query(sql, data,(err, results) => {
     if(err){
