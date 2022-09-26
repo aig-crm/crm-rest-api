@@ -425,6 +425,19 @@ app.get('/api/reportR/:tower/:unit_no',(req, res) => {
   });
   });
 
+//BOOKING API- gst_choice of unit_no booked
+app.get('/api/bookingApi/gst_choice/:tower/:unit_no',(req, res) => {
+  let sql = "select m.gst_choice from tower_units tu inner join (select unit_no->>'$.unit_no' as unit_no, gst_choice->>'$.gst_choice' as gst_choice from customer)m on m.unit_no=tu.unit_no where tu.tower="+req.params.tower+" and tu.unit_no="+req.params.unit_no;
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
 //BOOKING API- unit_no booked
 app.get('/api/bookingApi/booked_units/:tower',(req, res) => {
   let sql = "select tu.unit_no, m.gst_choice from tower_units tu inner join (select unit_no->>'$.unit_no' as unit_no, gst_choice->>'$.gst_choice' as gst_choice from customer)m on m.unit_no=tu.unit_no where tu.tower="+req.params.tower;
