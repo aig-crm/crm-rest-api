@@ -310,7 +310,7 @@ let query = conn.query(sql, (err, results) => {
 
 //show receipt for single unit receipt_pending
 app.get('/api/receipt_pending/:tower/:unit_no',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=0, 'Pending', '') as status, clearing_bank, DATE_FORMAT(clearing_date, '%d-%m-%Y') as clearing_date FROM customer_account where status=0 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=0, 'Pending', '') as status, clearing_bank, DATE_FORMAT(clearing_date, '%d-%m-%Y') as clearing_date, bank_branch, ref_no FROM customer_account where status=0 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -323,7 +323,7 @@ app.get('/api/receipt_pending/:tower/:unit_no',(req, res) => {
 
 //show receipt for single unit receipt_approved
 app.get('/api/receipt_approved/:tower/:unit_no',(req, res) => {
-  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=1, 'Approved', '') as status, clearing_bank, DATE_FORMAT(clearing_date, '%d-%m-%Y') as clearing_date FROM customer_account where status=1 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
+  let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, if(status=1, 'Approved', '') as status, clearing_bank, DATE_FORMAT(clearing_date, '%d-%m-%Y') as clearing_date, bank_branch, ref_no FROM customer_account where status=1 and substring(unit_no,1,1)="+req.params.tower+" and unit_no="+req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
