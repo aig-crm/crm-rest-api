@@ -604,8 +604,8 @@ app.post('/api/crm',(req, res) => {
   });
 
 //update payment (for status only)
-app.put('/api/customer_account/:id',(req, res) => {
-  let sql = "UPDATE customer_account SET status='"+req.body.status+"' WHERE id="+req.params.id;
+app.put('/api/customer_account/:receipt_no',(req, res) => {
+  let sql = "UPDATE customer_account SET status='"+req.body.status+"', clearing_bank='"+req.body.clearing_bank+"', clearing_date='"+req.body.clearing_date+"' WHERE id="+req.params.receipt_no;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
