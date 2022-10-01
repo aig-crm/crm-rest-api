@@ -503,6 +503,19 @@ app.get('/api/bookingApi/broker',(req, res) => {
   });
   });
 
+//show other charges
+app.get('/api/other_charges/:unit_no',(req, res) => {
+  let sql = "select parameters, basic_cost, paid_cost from other_charges where unit_no="+req.params.unit_no;
+  let query = conn.query(sql, (err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
 //show canceled bookings
 app.get('/api/cbookings',(req, res) => {
   let sql = "select s_no, booking_date, unit_no, area_sqft, applicant_name, applicant_mob_no, applicant_email, broker, plan, loan, nbp, tbc, tower, coapplicant_name, coapplicant_mob_no, coapplicant_email, amt, remarks from cancel_bookings order by s_no";
@@ -561,6 +574,20 @@ app.post('/api/cancel_booking/:unit_no',(req, res) => {
 app.post('/api/:unit_no/customer_account',(req, res) => {
   let data = {id: req.body.id, unit_no: req.params.unit_no, payment_mode: req.body.payment_mode, date: req.body.date, bank_name: req.body.bank_name, rwgst: req.body.rwgst, rgst: req.body.rgst, receipt_no: req.body.receipt_no, status: 0, bank_branch: req.body.bank_branch, ref_no: req.body.ref_no};
   let sql = "INSERT INTO customer_account SET ?";
+  let query = conn.query(sql, data,(err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
+//add other charges
+app.post('/api/other_charges',(req, res) => {
+  let data = {unit_no: req.body.unit_no, parameters: req.body.parameters, basic_cost: req.body.basic_cost, paid_cost: req.body.paid_cost};
+  let sql = "INSERT INTO other_charges SET ?";
   let query = conn.query(sql, data,(err, results) => {
     if(err){
       throw err
