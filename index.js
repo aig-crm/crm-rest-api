@@ -505,7 +505,7 @@ app.get('/api/bookingApi/broker',(req, res) => {
 
 //show other charges
 app.get('/api/other_charges/:unit_no',(req, res) => {
-  let sql = "select parameters, basic_cost, paid_cost from other_charges where unit_no="+req.params.unit_no;
+  let sql = "select id, parameters, basic_cost, paid_cost from other_charges where unit_no="+req.params.unit_no+" order by s_no";
   let query = conn.query(sql, (err, results) => {
     if(err){
       throw err
@@ -586,7 +586,7 @@ app.post('/api/:unit_no/customer_account',(req, res) => {
 
 //add other charges
 app.post('/api/other_charges',(req, res) => {
-  let data = {unit_no: req.body.unit_no, parameters: req.body.parameters, basic_cost: req.body.basic_cost, paid_cost: req.body.paid_cost};
+  let data = {id: req.body.id, unit_no: req.body.unit_no, parameters: req.body.parameters, basic_cost: req.body.basic_cost, paid_cost: req.body.paid_cost};
   let sql = "INSERT INTO other_charges SET ?";
   let query = conn.query(sql, data,(err, results) => {
     if(err){
@@ -633,6 +633,19 @@ app.post('/api/crm',(req, res) => {
 //update payment (for status only)
 app.put('/api/customer_account/:receipt_no',(req, res) => {
   let sql = "UPDATE customer_account SET status='"+req.body.status+"', clearing_bank='"+req.body.clearing_bank+"', clearing_date='"+req.body.clearing_date+"' WHERE receipt_no="+req.params.receipt_no;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+    });
+  });
+
+//update other charges
+app.put('/api/other_charges_edit/:id',(req, res) => {
+  let sql = "UPDATE other_charges SET basic_cost='"+req.body.basic_cost+"', paid_cost='"+req.body.paid_cost+"' WHERE id="+req.params.id;
   let query = conn.query(sql, (err, results) => {
       if(err){
         throw err
