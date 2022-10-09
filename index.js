@@ -542,6 +542,32 @@ app.get('/api/cbookings/:tower',(req, res) => {
   });
   });
 
+//show brokers with booked units count
+app.get('/api/broker',(req, res) => {
+  let sql = "SELECT broker_code, bcn, bank_name, name, dob, sevice_tax_no, gstin, gst_state, eff_date, rera_no, pan_no, tan_no, licence_no, std_code, phone_no, mob_no, email, b.address, count(unit_no) as unit_cnt FROM brokers b inner join customer c on c.broker->>'$.bcn'=b.bcn group by b.bcn order by unit_cnt desc";
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
+//show broker with booked unit
+app.get('/api/broker/:bcn',(req, res) => {
+  let sql = "SELECT broker_code, bcn, bank_name, name, dob, sevice_tax_no, gstin, gst_state, eff_date, rera_no, pan_no, tan_no, licence_no, std_code, phone_no, mob_no, email, b.address, unit_no->>'$.unit_no' as unit_no FROM brokers b inner join customer c on c.broker->>'$.bcn'=b.bcn where b.bcn="+req.params.bcn;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+  });
+  });
+
 //add new unit
 app.post('/api/customer',(req, res) => {
 let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, applicant_name: req.body.applicant_name, applicant_mob_no: req.body.applicant_mob_no, applicant_email: req.body.applicant_email, coapplicant_name: req.body.coapplicant_name, coapplicant_mob_no: req.body.coapplicant_mob_no, coapplicant_email: req.body.coapplicant_email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower, aadhar_card: req.body.aadhar_card, address: req.body.address, gst_choice: req.body.gst_choice, pan_card: req.body.pan_card};
