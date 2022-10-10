@@ -568,6 +568,33 @@ app.get('/api/broker/:bcn',(req, res) => {
   });
   });
 
+  //show broker details
+  app.get('/api/brokerDetails/:bcn',(req, res) => {
+    let sql = "SELECT if(broker_code='', 'NA', broker_code) as broker_code, if(bcn='', 'NA', bcn) as bcn, if(bank_name='', 'NA', bank_name) as bank_name, if(name='', 'NA', name) as name, if(dob='', 'NA', dob) as dob, if(sevice_tax_no='', 'NA', sevice_tax_no) as sevice_tax_no, if(gstin='', 'NA', gstin) as gstin, if(gst_state='', 'NA', gst_state) as gst_state, if(eff_date='', 'NA', eff_date) as eff_date, if(rera_no='', 'NA', rera_no) as rera_no, if(pan_no='', 'NA', pan_no) as pan_no, if(tan_no='', 'NA', tan_no) as tan_no, if(licence_no='', 'NA', licence_no) as licence_no, if(std_code='', 'NA', std_code) as std_code, if(phone_no='', 'NA', phone_no) as phone_no, if(mob_no='', 'NA', mob_no) as mob_no, if(email='', 'NA', email) as email, if(address='', 'NA', address) as address FROM brokers where bcn="+req.params.bcn;
+    let query = conn.query(sql, (err, results) => {
+        if(err){
+          throw err
+        }
+        else {
+          res.send(JSON.stringify(results))
+        };
+    });
+    });
+
+//add new broker
+app.post('/api/addBroker',(req, res) => {
+  let data = {broker_code: req.body.broker_code, bcn: req.body.bcn, bank_name: req.body.bank_name, name: req.body.name, dob: req.body.dob, sevice_tax_no: req.body.sevice_tax_no, gstin: req.body.gstin, gst_state: req.body.gst_state, eff_date: req.body.eff_date, rera_no: req.body.rera_no, pan_no: req.body.pan_no, tan_no: req.body.tan_no, licence_no: req.body.licence_no, std_code: req.body.std_code, phone_no: req.body.phone_no, mob_no: req.body.mob_no, email: req.body.email, address: req.body.address};
+  let sql = "INSERT INTO brokers SET ?";
+  let query = conn.query(sql, data,(err, results) => {
+    if(err){
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+  });
+
 //add new unit
 app.post('/api/customer',(req, res) => {
 let data = {s_no: req.body.s_no, booking_date: req.body.booking_date, unit_no: req.body.unit_no, area_sqft: req.body.area_sqft, applicant_name: req.body.applicant_name, applicant_mob_no: req.body.applicant_mob_no, applicant_email: req.body.applicant_email, coapplicant_name: req.body.coapplicant_name, coapplicant_mob_no: req.body.coapplicant_mob_no, coapplicant_email: req.body.coapplicant_email, broker: req.body.broker, plan: req.body.plan, loan: req.body.loan, nbp: req.body.nbp, tbc: req.body.tbc, floor: req.body.floor, basement: req.body.basement, tower: req.body.tower, aadhar_card: req.body.aadhar_card, address: req.body.address, gst_choice: req.body.gst_choice, pan_card: req.body.pan_card};
