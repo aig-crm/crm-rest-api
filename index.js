@@ -683,6 +683,19 @@ app.post('/api/crm',(req, res) => {
   });
   });
 
+//update broker details
+app.put('/api/editBroker/:bcn',(req, res) => {
+  let sql = "UPDATE brokers SET broker_code='"+req.body.broker_code+"', bcn='"+req.body.bcn+"', bank_name='"+req.body.bank_name+"', name='"+req.body.name+"', dob='"+req.body.dob+"', sevice_tax_no='"+req.body.sevice_tax_no+"', gstin='"+req.body.gstin+"', gst_state='"+req.body.gst_state+"', eff_date='"+req.body.eff_date+"', rera_no='"+req.body.rera_no+"', pan_no='"+req.body.pan_no+"', tan_no='"+req.body.tan_no+"', licence_no='"+req.body.licence_no+"', std_code='"+req.body.std_code+"', phone_no='"+req.body.phone_no+"', mob_no='"+req.body.mob_no+"', email='"+req.body.email+"', address='"+req.body.address+"' WHERE bcn="+req.params.bcn;
+  let query = conn.query(sql, (err, results) => {
+      if(err){
+        throw err
+      }
+      else {
+        res.send(JSON.stringify(results))
+      };
+    });
+  });
+
 //update payment (for status only)
 app.put('/api/customer_account/:receipt_no',(req, res) => {
   let sql = "UPDATE customer_account SET status='"+req.body.status+"', clearing_bank='"+req.body.clearing_bank+"', clearing_date='"+req.body.clearing_date+"' WHERE receipt_no="+req.params.receipt_no;
