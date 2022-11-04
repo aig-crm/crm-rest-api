@@ -4,28 +4,7 @@ var app = express();
 var mysql = require('mysql');
 const cors = require('cors');
 const multer = require('multer');
-// const swaggerJSDoc = require('swagger-jsdoc');
-// const swaggerUi = require('swagger-ui-express');
-
-// const options ={
-//   definitions: {
-//     openapi: '3.0.0',
-//     info : {
-//       title: 'AIG Royal ERP apis',
-//       version: '1.0.0'
-//     },
-//     servers: [
-//       {
-//         url: 'https://2646-103-163-108-188.in.ngrok.io'
-//       }
-//     ]
-//   },
-//   apis: ['C:\Users\Rohan Aggarwal\nodejs\restful-api\index.js']
-// }
-
-// const swaggerSpec = swaggerJSDoc(options)
-
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec))
+const fs = require("fs");
 
 console.log('Get connection ...');
 
@@ -49,19 +28,7 @@ conn.connect(function (err) {
   console.log("Connected!");
 });
 
-//! Use of Multer
-var storage = multer.diskStorage({
-  destination: (req, file, callBack) => {
-    callBack(null, './public/images/')     // './public/images/' directory name where save the file
-  },
-  filename: (req, file, callBack) => {
-    callBack(null, file.fieldname + '-' + Date.now())
-  }
-})
-
-var upload = multer({
-  storage: storage
-});
+const upload = multer({ dest: "uploads/" });
 
 //show main
 app.get('/api/main', (req, res) => {
@@ -596,6 +563,19 @@ app.get('/api/brokerDetails/:bcn', (req, res) => {
   });
 });
 
+//show documents
+// app.get('/doc/:filename', (req, res) => {
+//   let sql = "SELECT file FROM documents where filename=" + req.params.filename;
+//   let query = conn.query(sql, (err, results) => {
+//     if (err) {
+//       throw err
+//     }
+//     else {
+//       res.send(JSON.stringify(results))
+//     };
+//   });
+// });
+
 //add new broker
 app.post('/api/addBroker', (req, res) => {
   let data = { broker_code: req.body.broker_code, bcn: req.body.bcn, bank_name: req.body.bank_name, name: req.body.name, dob: req.body.dob, sevice_tax_no: req.body.sevice_tax_no, gstin: req.body.gstin, gst_state: req.body.gst_state, eff_date: req.body.eff_date, rera_no: req.body.rera_no, pan_no: req.body.pan_no, tan_no: req.body.tan_no, licence_no: req.body.licence_no, std_code: req.body.std_code, phone_no: req.body.phone_no, mob_no: req.body.mob_no, email: req.body.email, address: req.body.address };
@@ -666,36 +646,33 @@ app.post('/api/other_charges', (req, res) => {
   });
 });
 
-// //add files
-// app.post('/api/uploadFile',(req, res) => {
-//   let data = {file: req.body.file};
-//   let sql = "INSERT INTO documents SET ?";
-//   let query = conn.query(sql, data,(err, results) => {
-//     if(err){
-//       throw err
-//     }
-//     else {
-//       res.send(JSON.stringify(results))
-//     };
-//   });
-//   });
+app.post("/api/uploadFile", upload.single("file"), (req, res) => {
+  const unit_no = req.body.unit_no;
+  const photo = req.body.file;
+  const filename = req.body.filename;
+  const id = unit_no +'-'+ filename +'-'+ Date.now();
+  const fileType = req.body.filetype.split("/")[1];
+  const blob_key = req.body.blob_key;
+  let newFileName = filename;
 
-//@type   POST
-//route for post data
-app.post("/api/uploadFile", upload.single('file'), (req, res) => {
-  if (!req.file) {
-    console.log("No file upload");
-  } else {
-    console.log(req.body.filename)
-    var docsrc = 'http://localhost:80/doc/' + req.body.filename
-    var insertData = "INSERT INTO documents (file, filename, id, unit_no) values (?,'" + req.body.filename + "','" + req.body.filename + "-" + Date.now() + "','" + req.body.unit_no + "'" + ")"
-    conn.query(insertData, [docsrc], (err, results) => {
-      if (err) { throw err }
-      else {
-        res.send(JSON.stringify(results))
-      };
-    })
-  }
+  fs.rename(
+    `./uploads/${filename}`,
+    `./uploads/${newFileName}`,
+    function () {
+      console.log("file renamed and uploaded");
+    }
+  );
+  console.log(photo);
+  console.log("fileName ", newFileName);
+
+  conn.query(
+    "INSERT INTO documents SET file=? , unit_no=? , filename=? , id=? , blob_key=?",
+    [newFileName, unit_no, filename, id, blob_key],
+    (err, result) => {
+      console.log(err);
+      res.json({ result });
+    }
+  );
 });
 
 //login admin
