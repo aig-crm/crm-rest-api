@@ -5,6 +5,7 @@ var mysql = require('mysql');
 const cors = require('cors');
 const multer = require('multer');
 const fs = require("fs");
+const moment = require("moment");
 
 console.log('Get connection ...');
 
@@ -27,8 +28,6 @@ conn.connect(function (err) {
   if (err) throw err;
   console.log("Connected!");
 });
-
-const upload = multer({ dest: "uploads/" });
 
 //show main
 app.get('/api/main', (req, res) => {
@@ -563,9 +562,9 @@ app.get('/api/brokerDetails/:bcn', (req, res) => {
   });
 });
 
-//show documents
-// app.get('/doc/:filename', (req, res) => {
-//   let sql = "SELECT file FROM documents where filename=" + req.params.filename;
+// //show specific documents for a unit
+// app.get('/api/file/:unit_no/:filename', (req, res) => {
+//   let sql = "SELECT blob_key FROM documents where unit_no= " + req.params.unit_no + " and filename=" + req.params.filename;
 //   let query = conn.query(sql, (err, results) => {
 //     if (err) {
 //       throw err
@@ -575,6 +574,20 @@ app.get('/api/brokerDetails/:bcn', (req, res) => {
 //     };
 //   });
 // });
+
+//show all documents for a unit
+app.get('/api/file/:unit_no', (req, res) => {
+  let sql = "SELECT file, unit_no, date FROM documents where unit_no= " + req.params.unit_no;
+  conn.query(sql, (err, results) => {
+    if (err) {
+      console.log(err)
+    } else {
+      res.status(201).json({ status: 201, data: results })
+    }
+  });
+});
+
+app.use("/uploads", express.static("./uploads"));
 
 //add new broker
 app.post('/api/addBroker', (req, res) => {
@@ -646,33 +659,41 @@ app.post('/api/other_charges', (req, res) => {
   });
 });
 
+// const upload = multer({ dest: "uploads/" });
+
+var imgconfig = multer.diskStorage({
+  destination: (req, file, callback) => {
+    callback(null, "./uploads");
+  },
+  filename: (req, file, callback) => {
+    callback(null, `file-${Date.now()}.${file.originalname}`);
+  }
+});
+
+// const isImage =(req, file, callback)=>{
+//   if(file.mimetype.startsWidth("image")){
+//     callback(null, true)
+//   }else{
+//     callback(null, Error("only image is allowed!"))
+//   }
+// }
+
+var upload = multer({
+  storage: imgconfig
+})
+
 app.post("/api/uploadFile", upload.single("file"), (req, res) => {
   const unit_no = req.body.unit_no;
-  const photo = req.body.file;
-  const filename = req.body.filename;
-  const id = unit_no +'-'+ filename +'-'+ Date.now();
-  const fileType = req.body.filetype.split("/")[1];
-  const blob_key = req.body.blob_key;
-  let newFileName = filename;
-
-  fs.rename(
-    `./uploads/${filename}`,
-    `./uploads/${newFileName}`,
-    function () {
-      console.log("file renamed and uploaded");
+  const photo = req.file.filename;
+  const date = moment(new Date()).format("YYYY-MM-DD hh:mm:ss");
+  conn.query("INSERT INTO documents SET ?", { unit_no: unit_no, file: photo, date: date }, (err, result) => {
+    if (err) {
+      console.log(err)
+    } else {
+      console.log("data added!");
+      res.status(201).json({ status: 201, data: req.body })
     }
-  );
-  console.log(photo);
-  console.log("fileName ", newFileName);
-
-  conn.query(
-    "INSERT INTO documents SET file=? , unit_no=? , filename=? , id=? , blob_key=?",
-    [newFileName, unit_no, filename, id, blob_key],
-    (err, result) => {
-      console.log(err);
-      res.json({ result });
-    }
-  );
+  });
 });
 
 //login admin
