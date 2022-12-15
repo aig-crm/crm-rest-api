@@ -579,34 +579,12 @@ var path = require('path');
 
 //show all documents for a unit
 app.get('/api/file/:unit_no', (req, res) => {
-  a1 = [];
-  arr = [];
   let sql = "SELECT file, unit_no, date FROM documents where unit_no= " + req.params.unit_no;
   conn.query(sql, (err, results) => {
     if (err) {
       console.log(err)
     } else {
-      let newArray = results.map((row) => {
-        return row.file;
-      })
-      a1 = newArray;
-      for (i1 = 0; i1 < a1.length; i1++) {
-        //arr.push('{"file": ' + '"' + path.resolve('uploads', a1[i1]) + '"' + ',' + '"filename": ' + '"' + a1[i1] + '"' + '}')
-        fs.readFile(path.resolve('uploads', a1[i1]), 'utf8', (err, data) => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          //arr.push('{"file": ' + '"' + URL.createObjectURL("{" + data + "}") + '"' + ',' + '"filename": ' + '"' + a1[i1] + '"' + '}')
-          console.log(data, "/n/n", typeof(data))
-        });
-        
-      }
-      const element = [];
-      arr.forEach((item) => {
-        element.push(JSON.parse(item));
-      })
-      res.send(element);
+      res.send(JSON.stringify(results));
     }
   });
 });
@@ -690,7 +668,7 @@ var imgconfig = multer.diskStorage({
     callback(null, "./uploads");
   },
   filename: (req, file, callback) => {
-    callback(null, `file-${Date.now()}.${file.originalname}`);
+    callback(null, file.originalname);
   }
 });
 
