@@ -486,7 +486,7 @@ app.get('/api/bookingApi/broker', (req, res) => {
 
 //show other charges
 app.get('/api/other_charges/:unit_no', (req, res) => {
-  let sql = "select id, parameters, basic_cost, paid_cost from other_charges where unit_no=" + req.params.unit_no + " order by s_no";
+  let sql = "select id, unit_no, unit_type, bc_otlr, pc_otlr, bc_2yamc, pc_2yamc, bc_emc, pc_emc, bc_dcpb, pc_dcpb, bc_eic, pc_eic, bc_cap, pc_cap, bc_wsc, pc_wsc, bc_iglc, pc_iglc, bc_1ycuc, pc_1ycuc, bc_ifms, pc_ifms from other_charges where unit_no=" + req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if (err) {
       throw err
@@ -647,19 +647,19 @@ app.post('/api/:unit_no/customer_account', (req, res) => {
   });
 });
 
-//add other charges
-app.post('/api/other_charges', (req, res) => {
-  let data = { id: req.body.id, unit_no: req.body.unit_no, parameters: req.body.parameters, basic_cost: req.body.basic_cost, paid_cost: req.body.paid_cost };
-  let sql = "INSERT INTO other_charges SET ?";
-  let query = conn.query(sql, data, (err, results) => {
-    if (err) {
-      throw err
-    }
-    else {
-      res.send(JSON.stringify(results))
-    };
-  });
-});
+// //add other charges
+// app.post('/api/other_charges', (req, res) => {
+//   let data = { id: req.body.id, unit_no: req.body.unit_no, parameters: req.body.parameters, basic_cost: req.body.basic_cost, paid_cost: req.body.paid_cost };
+//   let sql = "INSERT INTO other_charges SET ?";
+//   let query = conn.query(sql, data, (err, results) => {
+//     if (err) {
+//       throw err
+//     }
+//     else {
+//       res.send(JSON.stringify(results))
+//     };
+//   });
+// });
 
 // const upload = multer({ dest: "uploads/" });
 
