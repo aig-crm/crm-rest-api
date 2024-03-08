@@ -16,9 +16,9 @@ app.use(cors());
 
 //create database connection
 var conn = mysql.createConnection({
-  database: 'aig_crm',
+  database: 'aig_royal_park_crm',
   host: "localhost",
-  user: "AIGROYAL",
+  user: "root",
   password: "aig1357!AIG",
   connectTimeout: 60000
 });
@@ -344,6 +344,19 @@ app.get('/api/reminder/:tower/:unit_no', (req, res) => {
 //show demand-reminder for specific id
 app.get('/api/demandR/:id', (req, res) => {
   let sql = "select id, substring(unit_no,1,1) as tower, unit_no, DATE_FORMAT(due_date, '%d-%m-%Y') as due_date, description, percentage, net_bsp, gst/2 as cgst, gst/2 as sgst, gst, net_due, recieved, net_due-recieved as pending_amount from customer_payment_plan where due_date is not null and recieved<net_due and id=" + req.params.id;
+  let query = conn.query(sql, (err, results) => {
+    if (err) {
+      throw err
+    }
+    else {
+      res.send(JSON.stringify(results))
+    };
+  });
+});
+
+//show demand-reminder for specific unit
+app.get('/api/demandR/:tower/:unit_no', (req, res) => {
+  let sql = "select id, substring(unit_no,1,1) as tower, unit_no, min(DATE_FORMAT(due_date, '%d-%m-%Y')) as due_date, description, percentage, net_bsp, gst/2 as cgst, gst/2 as sgst, gst, net_due, recieved, sum(net_due-recieved) as pending_amount from customer_payment_plan where due_date is not null and recieved<net_due and unit_no=" + req.params.unit_no;
   let query = conn.query(sql, (err, results) => {
     if (err) {
       throw err
