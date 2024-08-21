@@ -42,7 +42,7 @@ app.get('/api/main', (req, res) => {
   });
 });
 
-//show receipt
+//show receipt 
 app.get('/api/receipt', (req, res) => {
   let sql = "SELECT concat(unit_no,'[',id,']') as id, substring(unit_no,1,1) as tower, unit_no, payment_mode, DATE_FORMAT(date, '%d-%m-%Y') as date, bank_name, rwgst, round(if(rwgst*0.05>ifnull(rgst, 0)>0, rwgst-rgst, rwgst-rwgst*0.05)) as rwogst, rgst, receipt_no, status FROM customer_account";
   let query = conn.query(sql, (err, results) => {
